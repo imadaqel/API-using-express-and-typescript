@@ -10,12 +10,15 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+var uniqueId = 4;
 app.post('/api/category', function (req, res) {
+    uniqueId++;
+    console.log(uniqueId, req.body.name);
     var Category = {
-        id: req.body.id,
+        id: uniqueId,
         name: req.body.name
     };
-    fs.readFile('./MOCK_DATA.json', function (err, currendata) {
+    fs.readFile('./category.json', function (err, currendata) {
         if (err) {
             console.log(err);
         }
@@ -25,14 +28,14 @@ app.post('/api/category', function (req, res) {
             console.log(obj);
             obj.push(Category);
             var json = JSON.stringify(obj);
-            fs.writeFile('./MOCK_DATA.json', json, function (err) {
+            fs.writeFile('./category.json', json, function (err) {
                 if (err)
                     throw err;
-                console.log('Lyric saved!');
+                console.log('Category saved!');
             });
         }
     });
-    res.end();
+    res.send(Category);
 });
 // function addProduct(name, categoryId) {
 //     let categryIdsList :number[] = [1,2];
@@ -47,7 +50,7 @@ app.get('/api/category', function (req, res) {
     // } catch (error) {
     //     return res.status(400).send(error);
     // }
-    fs.readFile('./MOCK_DATA.json', function (err, data) {
+    fs.readFile('./category.json', function (err, data) {
         if (err) {
             console.log(err);
         }
@@ -62,7 +65,7 @@ app.get('/api/category', function (req, res) {
 app.get('/api/category/:id', function (req, res) {
     // res.send('id: ' + req.params.id);
     var itemId = Number(req.params.id);
-    fs.readFile('./MOCK_DATA.json', function (err, data) {
+    fs.readFile('./category.json', function (err, data) {
         if (err) {
             console.log(err);
         }
@@ -81,7 +84,7 @@ app.get('/api/category/:id', function (req, res) {
 });
 app.delete('/api/category/:id', function (req, res) {
     var itemId = Number(req.params.id);
-    fs.readFile('./MOCK_DATA.json', function (err, data) {
+    fs.readFile('./category.json', function (err, data) {
         if (err) {
             console.log(err);
         }
@@ -91,7 +94,7 @@ app.delete('/api/category/:id', function (req, res) {
             var filtered_list = obj.filter(function (item) { return item.id != itemId; });
             if (filtered_list) {
                 var json = JSON.stringify(filtered_list);
-                fs.writeFile('./MOCK_DATA.json', json, function (err) {
+                fs.writeFile('./category.json', json, function (err) {
                     if (err)
                         throw err;
                     console.log('ele deleted');
@@ -112,7 +115,7 @@ app.put('/api/category/:id', function (req, res) {
         name: req.body.name
     };
     console.log(item);
-    fs.readFile('./MOCK_DATA.json', function (err, data) {
+    fs.readFile('./category.json', function (err, data) {
         if (err) {
             console.log(err);
         }
@@ -132,7 +135,7 @@ app.put('/api/category/:id', function (req, res) {
                 }
             });
             var json = JSON.stringify(updatedListItems);
-            fs.writeFile('./MOCK_DATA.json', json, function (err) {
+            fs.writeFile('./category.json', json, function (err) {
                 if (err)
                     throw err;
                 console.log('ele deleted');

@@ -1,8 +1,9 @@
+// import app from './category'
 import express from "express";
-const app1 = express();
+const app = express();
 var fs = require('fs');
 var bodyParser = require('body-parser');
-app1.use(bodyParser.urlencoded({
+app.use(bodyParser.urlencoded({
     extended: true
 }));
 
@@ -21,13 +22,10 @@ interface ICheckouts {
     payment_amount: number;
     payment_method: string;
 }
-var uniqueId: number = 4;
-
-app1.post('/api/checkouts', (req, res) => {
-    uniqueId++;
+app.post('/api/checkouts', (req, res) => {
     console.log(req.body)
     var Checkouts: ICheckouts = {
-        id: uniqueId,
+        id: Math.floor(Math.random() * 100),
         products: [
             {
                 productId: req.body.products[0].productId,
@@ -56,7 +54,6 @@ app1.post('/api/checkouts', (req, res) => {
                 if (err) {
                     console.log(err);
                 } else {
-
                     let obj: ICheckouts[];
                     obj = JSON.parse(currendata);
                     console.log(obj)
@@ -71,15 +68,9 @@ app1.post('/api/checkouts', (req, res) => {
             });
         }
     });
-
-
-
 });
+const port = process.env.PORT || 3000;
 
+app.listen(port, () => console.log(`App listening on PORT ${port}`));
 
-
-const port = process.env.PORT || 4000;
-
-app1.listen(port, () => console.log(`App listening on PORT ${port}`));
-
-export default app1;
+export default app;

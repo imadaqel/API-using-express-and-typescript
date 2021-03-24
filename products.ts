@@ -1,5 +1,13 @@
-import app from './category';
+// import app from './category';
+// var fs = require('fs');
+import express from "express";
+const app = express();
 var fs = require('fs');
+var bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+
 interface IProduct {
     id: number;
     name: string;
@@ -10,32 +18,11 @@ interface IProduct {
     categoryId: number;
     description?: string;
     stockCount?: number;
-    expirationDate?: Date;
+    expirationDate?: number;
 }
-
-
-// function read(): any {
-//     var readData: string = '';
-//     fs.readFile('./product.json', (err: string, currendata: any): any => {
-//         if (err) {
-//             console.log(err);
-//             readData = err;
-//         } else {
-//             // console.log(JSON.parse(currendata))
-//             readData = currendata;
-//             return (readData);
-//         }
-
-//     });
-//     console.log(readData)
-//     return readData;
-// }
-// var currendata: any = read();
-// console.log(currendata)
-
 app.post('/api/product', (req, res) => {
     var Product: IProduct = {
-        id: req.body.id,
+        id: Math.floor(Math.random() * 100),
         name: req.body.name,
         rawPrice: req.body.rawPrice,
         price: req.body.price,
@@ -47,26 +34,37 @@ app.post('/api/product', (req, res) => {
         expirationDate: req.body.expirationDate,
     }
     if (Product.rawPrice >= Product.price) {
-        res.send("rawPrice is more than price")
+        res.status(404).send("rawPrice is more than price")
     }
     else {
-        fs.readFile('./product.json', (err: string, currendata: string) => {
-            if (err) {
-                console.log(err);
-            } else {
-                let obj: IProduct[];
-                obj = JSON.parse(currendata);
-                console.log(obj)
-                obj.push(Product);
-                var json = JSON.stringify(obj);
-                fs.writeFile('./product.json', json, (err: string) => {
-                    if (err) throw err;
-                    console.log('Lyric saved!');
+        fs.readFile('./category.json', (err: string, currendata: string) => {
+            let data: { id: number, name: string }[];
+            data = JSON.parse(currendata)
+            const categoryid = data.find(_item => _item.id == Product.categoryId);
+            console.log("hello hello hello", categoryid)
+            if (!categoryid) {
+                res.status(404).send("no related category with this id")
+            }
+            else {
+                fs.readFile('./product.json', (err: string, currendata: string) => {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        let obj: IProduct[];
+                        obj = JSON.parse(currendata);
+                        console.log(obj)
+                        obj.push(Product);
+                        var json = JSON.stringify(obj);
+                        fs.writeFile('./product.json', json, (err: string) => {
+                            if (err) throw err;
+                            console.log('product saved!');
+                            res.send(Product)
+                        });
+                    }
                 });
             }
         });
     }
-    res.end()
 });
 
 app.get('/api/product', (req, res) => {
@@ -96,7 +94,7 @@ app.get('/api/product/:id', (req, res) => {
                 res.send(item)
             }
             else {
-                res.send({ message: `item ${itemId} doesn't exist` })
+                res.status(404).send({ message: `item ${itemId} doesn't exist` })
             }
         }
     });
@@ -120,7 +118,7 @@ app.delete('/api/product/:id', (req, res) => {
                 res.send(filtered_list)
             }
             else {
-                res.send({ message: `item ${itemId} doesn't exist` })
+                res.status(404).send({ message: `item ${itemId} doesn't exist` })
             }
         }
     });
@@ -129,7 +127,6 @@ app.delete('/api/product/:id', (req, res) => {
 
 app.put('/api/product/:id', (req, res) => {
     let itemId: number = Number(req.params.id);
-    // const item = req.body;
     var item: IProduct = {
         id: req.body.id,
         name: req.body.name,
@@ -144,36 +141,50 @@ app.put('/api/product/:id', (req, res) => {
     }
     console.log(item)
     if (item.rawPrice >= item.price) {
-        res.send("rawPrice is more than price")
+        res.status(404).send("rawPrice is more than price")
     }
     else {
-        fs.readFile('./product.json', (err: string, data: string) => {
-            if (err) {
-                console.log(err);
-            } else {
-                var updatedListItems: any = [];
-                let obj: { id: number, name: string }[];
-                obj = JSON.parse(data);
-                obj.forEach(oldItem => {
-                    if (oldItem.id == itemId) {
-                        console.log(item)
-                        updatedListItems.push(item);
+        fs.readFile('./category.json', (err: string, currendata: string) => {
+            let data: { id: number, name: string }[];
+            data = JSON.parse(currendata)
+            const categoryid = data.find(_item => _item.id == req.body.products[0].productId);
+            console.log("categoryid", categoryid)
+            if (!categoryid) {
+                res.status(404).send("no related category with this id")
+            }
+            else {
+                fs.readFile('./product.json', (err: string, data: string) => {
+                    if (err) {
+                        console.log(err);
                     } else {
-                        console.log(oldItem)
-                        updatedListItems.push(oldItem);
-                        console.log(updatedListItems)
+                        var updatedListItems: any = [];
+                        let obj: { id: number, name: string }[];
+                        obj = JSON.parse(data);
+                        obj.forEach(oldItem => {
+                            if (oldItem.id == itemId) {
+                                console.log(item)
+                                updatedListItems.push(item);
+                            } else {
+                                console.log(oldItem)
+                                updatedListItems.push(oldItem);
+                                console.log(updatedListItems)
+                            }
+                        });
+                        var json = JSON.stringify(updatedListItems);
+                        fs.writeFile('./product.json', json, (err: string) => {
+                            if (err) throw err;
+                            console.log('ele updated');
+                        });
+                        res.send(updatedListItems)
                     }
                 });
-                var json = JSON.stringify(updatedListItems);
-                fs.writeFile('./product.json', json, (err: string) => {
-                    if (err) throw err;
-                    console.log('ele updated');
-                });
-                res.send(updatedListItems)
             }
         });
     }
 });
 
+const port = process.env.PORT || 3000;
+
+const server = app.listen(port, () => console.log(`App listening on PORT ${port}`));
 
 

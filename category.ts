@@ -11,19 +11,17 @@ interface ICategory {
     id: number;
     name: string;
 }
-var uniqueId: number = 4;
 app.post('/api/category', (req, res) => {
-    uniqueId++;
-    console.log(uniqueId, req.body.name)
+    console.log(req.body.name)
     var Category: ICategory = {
-        id: uniqueId,
+        id: Math.floor(Math.random() * 100),
         name: req.body.name
     }
     fs.readFile('./category.json', (err: string, currendata: string) => {
         if (err) {
             console.log(err);
         } else {
-            let obj: { id: number, name: string }[];
+            let obj: ICategory[];
             obj = JSON.parse(currendata);
             console.log(obj)
             obj.push(Category);
@@ -37,26 +35,12 @@ app.post('/api/category', (req, res) => {
     res.send(Category)
 });
 
-// function addProduct(name, categoryId) {
-//     let categryIdsList :number[] = [1,2];
-//     if (categryIdsList.indexOf(categoryId) === -1) {
-//         throw new Error(`Couldn't found category with this id  (${categoryId})`);
-//     }
-// }
-
 app.get('/api/category', (req, res) => {
-    // try {
-    //     addProduct('pp',10);
-    //     return res.send('Product has been added successfully');
-    // } catch (error) {
-    //     return res.status(400).send(error);
-    // }
-
     fs.readFile('./category.json', (err: string, data: string) => {
         if (err) {
             console.log(err);
         } else {
-            let obj: { id: number, name: string }[];
+            let obj: ICategory[];
             obj = JSON.parse(data);
             console.log(obj)
             res.send(obj)
@@ -78,7 +62,7 @@ app.get('/api/category/:id', (req, res) => {
                 res.send(item)
             }
             else {
-                res.send({ message: `item ${itemId} doesn't exist` })
+                res.status(404).send({ message: `item ${itemId} doesn't exist` })
             }
         }
     });
@@ -90,7 +74,7 @@ app.delete('/api/category/:id', (req, res) => {
         if (err) {
             console.log(err);
         } else {
-            let obj: { id: number, name: string }[];
+            let obj: ICategory[];
             obj = JSON.parse(data);
             const filtered_list = obj.filter(item => item.id != itemId);
             if (filtered_list) {
@@ -102,7 +86,7 @@ app.delete('/api/category/:id', (req, res) => {
                 res.send(filtered_list)
             }
             else {
-                res.send({ message: `item ${itemId} doesn't exist` })
+                res.status(404).send({ message: `item ${itemId} doesn't exist` })
             }
         }
     });
@@ -112,7 +96,7 @@ app.put('/api/category/:id', (req, res) => {
     let itemId: number = Number(req.params.id);
     // const item = req.body;
     var item: ICategory = {
-        id: req.body.id,
+        id: itemId,
         name: req.body.name
     }
     console.log(item)
@@ -121,7 +105,7 @@ app.put('/api/category/:id', (req, res) => {
             console.log(err);
         } else {
             var updatedListItems: any = [];
-            let obj: { id: number, name: string }[];
+            let obj: ICategory[];
             obj = JSON.parse(data);
             obj.forEach(oldItem => {
                 if (oldItem.id == itemId) {
@@ -136,7 +120,7 @@ app.put('/api/category/:id', (req, res) => {
             var json = JSON.stringify(updatedListItems);
             fs.writeFile('./category.json', json, (err: string) => {
                 if (err) throw err;
-                console.log('ele deleted');
+                console.log('element updated');
             });
             res.send(updatedListItems)
         }

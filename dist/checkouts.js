@@ -3,19 +3,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// import app from './category'
 var express_1 = __importDefault(require("express"));
-var app1 = express_1.default();
+var app = express_1.default();
 var fs = require('fs');
 var bodyParser = require('body-parser');
-app1.use(bodyParser.urlencoded({
+app.use(bodyParser.urlencoded({
     extended: true
 }));
-var uniqueId = 4;
-app1.post('/api/checkouts', function (req, res) {
-    uniqueId++;
+app.post('/api/checkouts', function (req, res) {
     console.log(req.body);
     var Checkouts = {
-        id: uniqueId,
+        id: Math.floor(Math.random() * 100),
         products: [
             {
                 productId: req.body.products[0].productId,
@@ -60,6 +59,6 @@ app1.post('/api/checkouts', function (req, res) {
         }
     });
 });
-var port = process.env.PORT || 4000;
-app1.listen(port, function () { return console.log("App listening on PORT " + port); });
-exports.default = app1;
+var port = process.env.PORT || 3000;
+app.listen(port, function () { return console.log("App listening on PORT " + port); });
+exports.default = app;

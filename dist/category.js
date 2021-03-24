@@ -10,12 +10,10 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({
     extended: true
 }));
-var uniqueId = 4;
 app.post('/api/category', function (req, res) {
-    uniqueId++;
-    console.log(uniqueId, req.body.name);
+    console.log(req.body.name);
     var Category = {
-        id: uniqueId,
+        id: Math.floor(Math.random() * 100),
         name: req.body.name
     };
     fs.readFile('./category.json', function (err, currendata) {
@@ -37,19 +35,7 @@ app.post('/api/category', function (req, res) {
     });
     res.send(Category);
 });
-// function addProduct(name, categoryId) {
-//     let categryIdsList :number[] = [1,2];
-//     if (categryIdsList.indexOf(categoryId) === -1) {
-//         throw new Error(`Couldn't found category with this id  (${categoryId})`);
-//     }
-// }
 app.get('/api/category', function (req, res) {
-    // try {
-    //     addProduct('pp',10);
-    //     return res.send('Product has been added successfully');
-    // } catch (error) {
-    //     return res.status(400).send(error);
-    // }
     fs.readFile('./category.json', function (err, data) {
         if (err) {
             console.log(err);
@@ -77,7 +63,7 @@ app.get('/api/category/:id', function (req, res) {
                 res.send(item);
             }
             else {
-                res.send({ message: "item " + itemId + " doesn't exist" });
+                res.status(404).send({ message: "item " + itemId + " doesn't exist" });
             }
         }
     });
@@ -102,7 +88,7 @@ app.delete('/api/category/:id', function (req, res) {
                 res.send(filtered_list);
             }
             else {
-                res.send({ message: "item " + itemId + " doesn't exist" });
+                res.status(404).send({ message: "item " + itemId + " doesn't exist" });
             }
         }
     });
@@ -111,7 +97,7 @@ app.put('/api/category/:id', function (req, res) {
     var itemId = Number(req.params.id);
     // const item = req.body;
     var item = {
-        id: req.body.id,
+        id: itemId,
         name: req.body.name
     };
     console.log(item);
@@ -138,7 +124,7 @@ app.put('/api/category/:id', function (req, res) {
             fs.writeFile('./category.json', json, function (err) {
                 if (err)
                     throw err;
-                console.log('ele deleted');
+                console.log('element updated');
             });
             res.send(updatedListItems);
         }
